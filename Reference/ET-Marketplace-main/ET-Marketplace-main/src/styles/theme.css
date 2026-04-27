@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --color-border: #8BAE66;
+  --color-input: #EBD5AB;
+  --color-ring: #628141;
+
+  --color-background: #EBD5AB;
+  --color-foreground: #1B211A;
+
+  --color-primary: #628141;
+  --color-primary-foreground: #EBD5AB;
+
+  --color-secondary: #8BAE66;
+  --color-secondary-foreground: #1B211A;
+
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+  --color-muted: #EBD5AB;
+  --color-muted-foreground: #628141;
+
+  --color-accent: #8BAE66;
+  --color-accent-foreground: #1B211A;
+
+  --color-popover: #EBD5AB;
+  --color-popover-foreground: #1B211A;
+
+  --color-card: #EBD5AB;
+  --color-card-foreground: #1B211A;
+
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
+}
+
+@layer base {
+  :root {
+    --background: 40 58% 80%; /* #EBD5AB */
+    --foreground: 104 12% 11%; /* #1B211A */
+
+    --card: 40 58% 80%;
+    --card-foreground: 104 12% 11%;
+
+    --popover: 40 58% 80%;
+    --popover-foreground: 104 12% 11%;
+
+    --primary: 89 33% 38%; /* #628141 */
+    --primary-foreground: 40 58% 80%;
+
+    --secondary: 90 32% 54%; /* #8BAE66 */
+    --secondary-foreground: 104 12% 11%;
+
+    --muted: 40 58% 70%;
+    --muted-foreground: 89 33% 38%;
+
+    --accent: 90 32% 54%;
+    --accent-foreground: 104 12% 11%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 90 32% 54%;
+    --input: 40 58% 80%;
+    --ring: 89 33% 38%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 104 12% 11%; /* #1B211A */
+    --foreground: 40 58% 80%; /* #EBD5AB */
+
+    --card: 104 12% 15%;
+    --card-foreground: 40 58% 80%;
+
+    --popover: 104 12% 11%;
+    --popover-foreground: 40 58% 80%;
+
+    --primary: 90 32% 54%; /* #8BAE66 */
+    --primary-foreground: 104 12% 11%;
+
+    --secondary: 89 33% 38%; /* #628141 */
+    --secondary-foreground: 40 58% 80%;
+
+    --muted: 104 12% 20%;
+    --muted-foreground: 90 32% 54%;
+
+    --accent: 89 33% 38%;
+    --accent-foreground: 40 58% 80%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 89 33% 38%;
+    --input: 104 12% 15%;
+    --ring: 90 32% 54%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-[#EBD5AB] text-[#1B211A];
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
