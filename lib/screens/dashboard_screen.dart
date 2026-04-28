@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart'; // <--- Added Animations
 import '../widgets/navbar.dart';
 import '../utils/responsive.dart';
 import '../theme/app_theme.dart';
@@ -13,13 +14,19 @@ abstract class BaseDashboardScreen extends StatelessWidget {
   List<DashboardStat> get stats;
   Widget buildRoleContent(BuildContext context);
 
+  // FIXED: Proper badge logic for all 3 roles
+  String get badgeLabel {
+    if (role == 'landowner') return 'Bukidnon Landowner';
+    if (role == 'validator') return 'Official Validator';
+    return 'Corporate Buyer';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = Responsive.isDesktop(context);
 
     return Scaffold(
-      appBar: const EchoTraceNavBar(currentRoute: '/dashboard', isAuthenticated: true),
-      drawer: isDesktop ? null : EchoTraceDrawer(currentRoute: '/dashboard'), // FIXED: Removed 'const'
+      appBar: EchoTraceNavBar(currentRoute: '/dashboard/$role'),
       body: SingleChildScrollView(
         child: MaxWidthContainer(
           child: Padding(
@@ -33,7 +40,9 @@ abstract class BaseDashboardScreen extends StatelessWidget {
                 const SizedBox(height: 40),
                 buildRoleContent(context),
               ],
-            ),
+            ).animate() // <--- Pro UI Entrance Animation
+                .fade(duration: 500.ms)
+                .slideY(begin: 0.05, end: 0, curve: Curves.easeOutQuart),
           ),
         ),
       ),
@@ -58,9 +67,7 @@ abstract class BaseDashboardScreen extends StatelessWidget {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.primary, AppTheme.primaryDark],
-              ),
+              gradient: const LinearGradient(colors: [AppTheme.primary, AppTheme.primaryDark]),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(roleIcon, color: AppTheme.surface, size: 36),
@@ -72,21 +79,13 @@ abstract class BaseDashboardScreen extends StatelessWidget {
               children: [
                 Text(
                   displayName,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.textPrimary,
-                  ),
+                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppTheme.textPrimary),
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  displaySubtitle,
-                  style: const TextStyle(fontSize: 15, color: AppTheme.primary),
-                ),
+                Text(displaySubtitle, style: const TextStyle(fontSize: 15, color: AppTheme.primary)),
               ],
             ),
           ),
-          // Badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -95,12 +94,8 @@ abstract class BaseDashboardScreen extends StatelessWidget {
               border: Border.all(color: AppTheme.primaryDark.withOpacity(0.4)),
             ),
             child: Text(
-              role == 'landowner' ? 'Landowner' : 'Corporate Buyer',
-              style: const TextStyle(
-                color: AppTheme.primary,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-              ),
+              badgeLabel,
+              style: const TextStyle(color: AppTheme.primary, fontSize: 13, fontWeight: FontWeight.w800),
             ),
           ),
         ],
@@ -112,7 +107,6 @@ abstract class BaseDashboardScreen extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         int crossAxisCount = constraints.maxWidth > 900 ? 3 : (constraints.maxWidth > 600 ? 2 : 1);
-
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -123,7 +117,10 @@ abstract class BaseDashboardScreen extends StatelessWidget {
             mainAxisExtent: 160,
           ),
           itemCount: stats.length,
-          itemBuilder: (context, index) => _StatCard(stat: stats[index]),
+          itemBuilder: (context, index) => _StatCard(stat: stats[index])
+              .animate(delay: (100 * index).ms) // Staggered card animations
+              .fade()
+              .scaleXY(begin: 0.95, end: 1.0, curve: Curves.easeOutBack),
         );
       },
     );

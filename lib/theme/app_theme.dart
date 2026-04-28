@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static const Color background = Color(0xFF131812);
@@ -10,6 +11,8 @@ class AppTheme {
   static const Color textSecondary = Color(0xFF8BAE66);
 
   static ThemeData get darkTheme {
+    final baseTextTheme = GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme);
+
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: background,
@@ -25,12 +28,12 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
       ),
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(color: textPrimary, fontWeight: FontWeight.w900, letterSpacing: -0.5),
-        displayMedium: TextStyle(color: textPrimary, fontWeight: FontWeight.w800, letterSpacing: -0.5),
-        titleLarge: TextStyle(color: textPrimary, fontWeight: FontWeight.w700),
-        bodyLarge: TextStyle(color: textPrimary, fontSize: 16),
-        bodyMedium: TextStyle(color: textSecondary, fontSize: 14),
+      textTheme: baseTextTheme.copyWith(
+        displayLarge: baseTextTheme.displayLarge?.copyWith(color: textPrimary, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+        displayMedium: baseTextTheme.displayMedium?.copyWith(color: textPrimary, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+        titleLarge: baseTextTheme.titleLarge?.copyWith(color: textPrimary, fontWeight: FontWeight.w700),
+        bodyLarge: baseTextTheme.bodyLarge?.copyWith(color: textPrimary, fontSize: 16),
+        bodyMedium: baseTextTheme.bodyMedium?.copyWith(color: textSecondary, fontSize: 14),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -39,7 +42,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+          textStyle: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 16),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -48,33 +51,15 @@ class AppTheme {
           foregroundColor: primary,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+          textStyle: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 16),
         ),
       ),
-      cardTheme: CardThemeData( // FIXED: Replaced CardTheme with CardThemeData
+      cardTheme: CardThemeData(
         color: surfaceLight,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(color: primaryDark.withOpacity(0.2)),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: textPrimary.withOpacity(0.05),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-        hintStyle: TextStyle(color: primary.withOpacity(0.4), fontSize: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: primaryDark.withOpacity(0.3)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: primaryDark.withOpacity(0.3)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: primary, width: 1.5),
         ),
       ),
     );
