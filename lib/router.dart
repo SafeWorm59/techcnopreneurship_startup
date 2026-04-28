@@ -1,50 +1,48 @@
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
 import 'screens/marketplace_screen.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/project_details_screen.dart';
+import 'screens/landowner/landowner_dashboard_screen.dart';
+import 'screens/buyer/buyer_dashboard_screen.dart';
 import 'screens/sensors_screen.dart';
 import 'screens/wallet_screen.dart';
 
-final GoRouter router = GoRouter(
-  routes: <RouteBase>[
+final router = GoRouter(
+  initialLocation: '/',
+  debugLogDiagnostics: true,
+  routes: [
     GoRoute(
       path: '/',
-      builder: (BuildContext context, GoRouterState state) {
-        return const HomeScreen();
-      },
+      builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       path: '/marketplace',
-      builder: (BuildContext context, GoRouterState state) {
-        return const MarketplaceScreen();
-      },
+      builder: (context, state) => const MarketplaceScreen(),
     ),
+    // Generic /dashboard redirects to login — role must be known first
     GoRoute(
       path: '/dashboard',
-      builder: (BuildContext context, GoRouterState state) {
-        return const DashboardScreen();
-      },
+      redirect: (context, state) => '/login',
     ),
     GoRoute(
-      path: '/project/:id',
-      builder: (BuildContext context, GoRouterState state) {
-        final id = state.pathParameters['id']!;
-        return ProjectDetailsScreen(id: id);
-      },
+      path: '/dashboard/landowner',
+      builder: (context, state) => const LandownerDashboardScreen(),
+    ),
+    GoRoute(
+      path: '/dashboard/buyer',
+      builder: (context, state) => const BuyerDashboardScreen(),
     ),
     GoRoute(
       path: '/sensors',
-      builder: (BuildContext context, GoRouterState state) {
-        return const SensorsScreen();
-      },
+      builder: (context, state) => const SensorsScreen(),
     ),
     GoRoute(
       path: '/wallet',
-      builder: (BuildContext context, GoRouterState state) {
-        return const WalletScreen();
-      },
+      builder: (context, state) => const WalletScreen(),
     ),
   ],
 );

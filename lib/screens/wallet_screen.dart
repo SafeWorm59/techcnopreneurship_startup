@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../widgets/navbar.dart';
 
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 768;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Carbon Wallet'),
-        backgroundColor: const Color(0xFF1B211A),
-        foregroundColor: const Color(0xFFEBD5AB),
-      ),
-      drawer: _buildDrawer(context),
+      backgroundColor: const Color(0xFF1B211A),
+      appBar: EchoTraceNavBar(currentRoute: '/wallet', isAuthenticated: true),
+      drawer: isDesktop ? null : const EchoTraceDrawer(currentRoute: '/wallet'),
       body: Container(
         color: const Color(0xFFEBD5AB),
         child: SingleChildScrollView(
@@ -32,10 +31,7 @@ class WalletScreen extends StatelessWidget {
               const SizedBox(height: 8),
               const Text(
                 'Track your earned credits and redemption history',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color(0xFF8BAE66),
-                ),
+                style: TextStyle(fontSize: 16, color: Color(0xFF8BAE66)),
               ),
               const SizedBox(height: 32),
 
@@ -68,9 +64,9 @@ class WalletScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    const Text(
                       '127',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 48,
                         fontWeight: FontWeight.w900,
                         color: Color(0xFF8BAE66),
@@ -79,19 +75,14 @@ class WalletScreen extends StatelessWidget {
                     const SizedBox(height: 4),
                     const Text(
                       'Equivalent to 127 tons CO₂ absorbed',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF8BAE66),
-                      ),
+                      style: TextStyle(fontSize: 14, color: Color(0xFF8BAE66)),
                     ),
                     const SizedBox(height: 24),
                     Row(
                       children: [
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {
-                              // Navigate to marketplace
-                            },
+                            onPressed: () => context.go('/marketplace'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF8BAE66),
                               foregroundColor: const Color(0xFF1B211A),
@@ -165,7 +156,6 @@ class WalletScreen extends StatelessWidget {
                 amount: '+15',
                 date: '1 week ago',
               ),
-
               const SizedBox(height: 32),
 
               // Market value
@@ -190,43 +180,27 @@ class WalletScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Current market price:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color(0xFF8BAE66),
-                          ),
-                        ),
-                        const Text(
-                          '\$16.50/credit',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFEBD5AB),
-                          ),
-                        ),
+                      children: const [
+                        Text('Current market price:',
+                            style: TextStyle(fontSize: 16, color: Color(0xFF8BAE66))),
+                        Text('\$16.50/credit',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFEBD5AB))),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Your credits value:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color(0xFF8BAE66),
-                          ),
-                        ),
-                        const Text(
-                          '\$2,097.50',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF8BAE66),
-                          ),
-                        ),
+                      children: const [
+                        Text('Your credits value:',
+                            style: TextStyle(fontSize: 16, color: Color(0xFF8BAE66))),
+                        Text('\$2,097.50',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF8BAE66))),
                       ],
                     ),
                   ],
@@ -266,120 +240,34 @@ class WalletScreen extends StatelessWidget {
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              isEarned ? Icons.add : Icons.remove,
-              color: color,
-              size: 20,
-            ),
+            child: Icon(isEarned ? Icons.add : Icons.remove, color: color, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFEBD5AB),
-                  ),
-                ),
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFEBD5AB))),
                 const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF8BAE66),
-                  ),
-                ),
+                Text(subtitle,
+                    style: const TextStyle(fontSize: 14, color: Color(0xFF8BAE66))),
               ],
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                amount,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
+              Text(amount,
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold, color: color)),
               const SizedBox(height: 4),
-              Text(
-                date,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF8BAE66),
-                ),
-              ),
+              Text(date,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF8BAE66))),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      backgroundColor: const Color(0xFF1B211A),
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Color(0xFF1B211A),
-            ),
-            child: Text(
-              'EchoTrace',
-              style: TextStyle(
-                color: Color(0xFFEBD5AB),
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home, color: Color(0xFF8BAE66)),
-            title: const Text('Home', style: TextStyle(color: Color(0xFFEBD5AB))),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.store, color: Color(0xFF8BAE66)),
-            title: const Text('Marketplace', style: TextStyle(color: Color(0xFFEBD5AB))),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/marketplace');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.dashboard, color: Color(0xFF8BAE66)),
-            title: const Text('Dashboard', style: TextStyle(color: Color(0xFFEBD5AB))),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/dashboard');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.sensors, color: Color(0xFF8BAE66)),
-            title: const Text('Sensors', style: TextStyle(color: Color(0xFFEBD5AB))),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/sensors');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.account_balance_wallet, color: Color(0xFF8BAE66)),
-            title: const Text('Wallet', style: TextStyle(color: Color(0xFFEBD5AB))),
-            onTap: () {
-              Navigator.pop(context);
-              context.go('/wallet');
-            },
           ),
         ],
       ),
