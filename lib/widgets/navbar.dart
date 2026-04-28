@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../utils/responsive.dart';
+import '../theme/app_theme.dart';
 
 class EchoTraceNavBar extends StatelessWidget implements PreferredSizeWidget {
   final String currentRoute;
@@ -12,102 +14,95 @@ class EchoTraceNavBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 10);
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 768;
+    final isDesktop = Responsive.isDesktop(context) || Responsive.isTablet(context);
 
     return AppBar(
-      backgroundColor: const Color(0xFF1B211A),
-      foregroundColor: const Color(0xFFEBD5AB),
-      elevation: 0,
-      automaticallyImplyLeading: isAuthenticated,
-      title: GestureDetector(
-        onTap: () => context.go('/'),
+      automaticallyImplyLeading: isAuthenticated && !isDesktop,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(color: AppTheme.primaryDark.withOpacity(0.2), height: 1),
+      ),
+      title: MaxWidthContainer(
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF8BAE66), Color(0xFF628141)],
+            GestureDetector(
+              onTap: () => context.go('/'),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppTheme.primary, AppTheme.primaryDark],
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.park, color: AppTheme.surface, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    RichText(
+                      text: const TextSpan(
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
+                        children: [
+                          TextSpan(text: 'Echo'),
+                          TextSpan(
+                            text: 'Trace',
+                            style: TextStyle(color: AppTheme.primary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF628141).withOpacity(0.4),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.park, color: Color(0xFF1B211A), size: 18),
-            ),
-            const SizedBox(width: 10),
-            RichText(
-              text: const TextSpan(
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFFEBD5AB),
-                  letterSpacing: -0.5,
-                ),
-                children: [
-                  TextSpan(text: 'Echo'),
-                  TextSpan(
-                    text: 'Trace',
-                    style: TextStyle(color: Color(0xFF8BAE66)),
-                  ),
-                ],
               ),
             ),
+            if (isDesktop)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: isAuthenticated
+                    ? _buildAuthDesktopNav(context)
+                    : _buildGuestNav(context),
+              ),
           ],
         ),
       ),
-      actions: isAuthenticated
-          ? (isDesktop ? _buildAuthDesktopNav(context) : null)
-          : _buildGuestNav(context),
     );
   }
 
-  /// Guest: only Login + Create Account
   List<Widget> _buildGuestNav(BuildContext context) {
     return [
       TextButton(
         onPressed: () => context.go('/login'),
-        child: const Text(
-          'Login',
-          style: TextStyle(color: Color(0xFF8BAE66), fontWeight: FontWeight.w600),
-        ),
+        style: TextButton.styleFrom(foregroundColor: AppTheme.primary),
+        child: const Text('Login'),
       ),
-      Padding(
-        padding: const EdgeInsets.only(right: 12, left: 4),
-        child: ElevatedButton(
-          onPressed: () => context.go('/register'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF628141),
-            foregroundColor: const Color(0xFFEBD5AB),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            elevation: 0,
-          ),
-          child: const Text(
-            'Create Account',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-          ),
+      const SizedBox(width: 16),
+      ElevatedButton(
+        onPressed: () => context.go('/register'),
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         ),
+        child: const Text('Create Account'),
       ),
     ];
   }
 
-  /// Authenticated desktop: full nav links + sign out
   List<Widget> _buildAuthDesktopNav(BuildContext context) {
     final navItems = [
-      (label: 'Home', route: '/'),
       (label: 'Marketplace', route: '/marketplace'),
       (label: 'Dashboard', route: '/dashboard'),
       (label: 'Sensors', route: '/sensors'),
@@ -116,42 +111,34 @@ class EchoTraceNavBar extends StatelessWidget implements PreferredSizeWidget {
 
     return [
       ...navItems.map((item) {
-        final isActive = currentRoute == item.route;
-        return TextButton(
-          onPressed: () => context.go(item.route),
-          child: Text(
-            item.label,
-            style: TextStyle(
-              color: isActive
-                  ? const Color(0xFF8BAE66)
-                  : const Color(0xFFEBD5AB).withOpacity(0.7),
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+        final isActive = currentRoute == item.route || currentRoute.startsWith('${item.route}/');
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: TextButton(
+            onPressed: () => context.go(item.route),
+            style: TextButton.styleFrom(
+              foregroundColor: isActive ? AppTheme.primary : AppTheme.textPrimary.withOpacity(0.7),
+              textStyle: TextStyle(
+                fontWeight: isActive ? FontWeight.w800 : FontWeight.w500,
+              ),
             ),
+            child: Text(item.label),
           ),
         );
       }),
-      const SizedBox(width: 8),
-      Padding(
-        padding: const EdgeInsets.only(right: 12),
-        child: OutlinedButton(
-          onPressed: () => context.go('/'),
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Color(0xFF628141)),
-            foregroundColor: const Color(0xFF8BAE66),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          ),
-          child: const Text(
-            'Sign Out',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-          ),
+      const SizedBox(width: 16),
+      OutlinedButton(
+        onPressed: () => context.go('/'),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         ),
+        child: const Text('Sign Out'),
       ),
     ];
   }
 }
 
-/// Mobile drawer — only used when authenticated
+// FIXED: Included missing EchoTraceDrawer properly styled
 class EchoTraceDrawer extends StatelessWidget {
   final String currentRoute;
 
@@ -159,114 +146,43 @@ class EchoTraceDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navItems = [
-      (label: 'Home', route: '/', icon: Icons.home),
-      (label: 'Marketplace', route: '/marketplace', icon: Icons.store),
-      (label: 'Dashboard', route: '/dashboard', icon: Icons.dashboard),
-      (label: 'Sensors', route: '/sensors', icon: Icons.sensors),
-      (label: 'Wallet', route: '/wallet', icon: Icons.account_balance_wallet),
-    ];
-
     return Drawer(
-      backgroundColor: const Color(0xFF1B211A),
+      backgroundColor: AppTheme.background,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(
-              color: Color(0xFF1B211A),
-              border: Border(
-                bottom: BorderSide(color: Color(0xFF628141), width: 0.5),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF8BAE66), Color(0xFF628141)],
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.park, color: Color(0xFF1B211A), size: 20),
-                    ),
-                    const SizedBox(width: 10),
-                    RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFFEBD5AB),
-                        ),
-                        children: [
-                          TextSpan(text: 'Echo'),
-                          TextSpan(
-                            text: 'Trace',
-                            style: TextStyle(color: Color(0xFF8BAE66)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Live Carbon Verification Network',
-                  style: TextStyle(color: Color(0xFF628141), fontSize: 11),
-                ),
-              ],
+            decoration: const BoxDecoration(color: AppTheme.surface),
+            child: Text(
+              'EchoTrace',
+              style: AppTheme.darkTheme.textTheme.displayMedium,
             ),
           ),
-          ...navItems.map((item) {
-            final isActive = currentRoute == item.route;
-            return ListTile(
-              leading: Icon(
-                item.icon,
-                color: isActive
-                    ? const Color(0xFF8BAE66)
-                    : const Color(0xFF628141).withOpacity(0.6),
-              ),
-              title: Text(
-                item.label,
-                style: TextStyle(
-                  color: isActive ? const Color(0xFF8BAE66) : const Color(0xFFEBD5AB),
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-                ),
-              ),
-              tileColor: isActive ? const Color(0xFF628141).withOpacity(0.1) : null,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              onTap: () {
-                Navigator.pop(context);
-                context.go(item.route);
-              },
-            );
-          }),
-          const Divider(color: Color(0xFF628141), height: 32, indent: 16, endIndent: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: OutlinedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                context.go('/');
-              },
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFF628141)),
-                foregroundColor: const Color(0xFF8BAE66),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-              child: const Text('Sign Out', style: TextStyle(fontWeight: FontWeight.w700)),
-            ),
-          ),
-          const SizedBox(height: 24),
+          _buildDrawerItem(context, 'Home', Icons.home, '/'),
+          _buildDrawerItem(context, 'Marketplace', Icons.store, '/marketplace'),
+          _buildDrawerItem(context, 'Dashboard', Icons.dashboard, '/dashboard'),
+          _buildDrawerItem(context, 'Sensors', Icons.sensors, '/sensors'),
+          _buildDrawerItem(context, 'Wallet', Icons.account_balance_wallet, '/wallet'),
         ],
       ),
+    );
+  }
+
+  Widget _buildDrawerItem(BuildContext context, String title, IconData icon, String route) {
+    final isActive = currentRoute == route || (route != '/' && currentRoute.startsWith(route));
+    return ListTile(
+      leading: Icon(icon, color: isActive ? AppTheme.primary : AppTheme.textPrimary.withOpacity(0.5)),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: isActive ? AppTheme.primary : AppTheme.textPrimary,
+          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        context.go(route);
+      },
     );
   }
 }

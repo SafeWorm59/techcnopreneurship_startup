@@ -16,7 +16,7 @@ const MOCK_LISTINGS = [
     currency: "USD",
     creditsAvailable: 1200,
     absorptionRate: "1.2 tons CO2/day",
-    verifiedBy: "BENRO & EchoTrace IoT",
+    verifiedBy: "DENR & EchoTrace IoT",
     image: "https://images.unsplash.com/photo-1564496027516-78e6fc218e97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMHNob3QlMjBmb3Jlc3QlMjBncmVlbnxlbnwxfHx8fDE3NzUxMDA2MDF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     tags: ["Pine Forest", "Indigenous Owned"],
     sensorData: [
@@ -113,7 +113,7 @@ export function Marketplace() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <div className="flex gap-2 bg-[#1B211A]/5 p-1 rounded-lg border border-[#628141]/20">
-            {['All Projects', 'BENRO Verified', 'Community Owned'].map((tab) => (
+            {['All Projects', 'DENR Verified', 'Community Owned'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab.toLowerCase())}

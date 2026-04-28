@@ -11,8 +11,8 @@ class WalletScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFF1B211A),
-      appBar: EchoTraceNavBar(currentRoute: '/wallet', isAuthenticated: true),
-      drawer: isDesktop ? null : const EchoTraceDrawer(currentRoute: '/wallet'),
+      appBar: const EchoTraceNavBar(currentRoute: '/wallet', isAuthenticated: true),
+      drawer: isDesktop ? null : EchoTraceDrawer(currentRoute: '/wallet'), // FIXED: Removed 'const'
       body: Container(
         color: const Color(0xFFEBD5AB),
         child: SingleChildScrollView(

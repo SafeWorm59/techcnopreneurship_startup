@@ -36,11 +36,11 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF1B211A),
-      appBar: EchoTraceNavBar(
+      appBar: const EchoTraceNavBar(
         currentRoute: '/marketplace',
         isAuthenticated: false, // ← swap to true once user is logged in
       ),
-      drawer: isDesktop ? null : const EchoTraceDrawer(currentRoute: '/marketplace'),
+      drawer: isDesktop ? null : EchoTraceDrawer(currentRoute: '/marketplace'), // FIXED: Removed 'const'
       body: Column(
         children: [
           // Hero header

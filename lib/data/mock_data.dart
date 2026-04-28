@@ -42,7 +42,7 @@ class MockData {
       currency: 'USD',
       creditsAvailable: 1200,
       absorptionRate: '1.2 tons CO₂/day',
-      verifiedBy: 'BENRO & EchoTrace IoT',
+      verifiedBy: 'DENR & EchoTrace IoT',
       image:
       'https://images.unsplash.com/photo-1564496027516-78e6fc218e97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMHNob3QlMjBmb3Jlc3QlMjBncmVlbnxlbnwxfHx8fDE3NzUxMDA2MDF8MA&ixlib=rb-4.1.0&q=80&w=1080',
       tags: ['Pine Forest', 'Indigenous Owned'],

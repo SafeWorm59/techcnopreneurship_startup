@@ -15,7 +15,7 @@ const MOCK_LISTINGS = [
     currency: "USD",
     creditsAvailable: 1200,
     absorptionRate: "1.2 tons CO2/day",
-    verifiedBy: "BENRO & EchoTrace IoT",
+    verifiedBy: "DENR & EchoTrace IoT",
     image: "https://images.unsplash.com/photo-1564496027516-78e6fc218e97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMHNob3QlMjBmb3Jlc3QlMjBncmVlbnxlbnwxfHx8fDE3NzUxMDA2MDF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     tags: ["Pine Forest", "Indigenous Owned"],
     description: "This project protects a vital buffer zone in the Mt. Kitanglad range, preventing agricultural encroachment. The standing trees act as a massive carbon sink, continuously monitored by EchoTrace sensors.",

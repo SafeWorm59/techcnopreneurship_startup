@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'router.dart';
+import 'theme/app_theme.dart';
 
 void main() {
   runApp(const MainApp());
@@ -13,20 +14,8 @@ class MainApp extends StatelessWidget {
     return MaterialApp.router(
       routerConfig: router,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF628141),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF628141),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      title: 'EchoTrace',
+      theme: AppTheme.darkTheme,
     );
   }
 }
