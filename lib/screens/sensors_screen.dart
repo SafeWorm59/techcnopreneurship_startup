@@ -18,7 +18,7 @@ class SensorsScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: MaxWidthContainer(
           child: Padding(
-            padding: const EdgeInsets.all(32),
+            padding: EdgeInsets.all(Responsive.isMobile(context) ? 20 : 32),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -35,14 +35,14 @@ class SensorsScreen extends StatelessWidget {
 
                 // Sensor status overview
                 Container(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
                   decoration: BoxDecoration(
                     color: AppTheme.surfaceLight,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: AppTheme.primaryDark.withOpacity(0.3)),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start, // FIXED: Align top for multi-line text
                     children: [
                       _buildStatusItem(icon: Icons.sensors, label: 'Active Sensors', value: '24', color: AppTheme.primary),
                       _buildStatusItem(icon: Icons.warning, label: 'Maintenance Due', value: '3', color: Colors.orange),
@@ -50,6 +50,7 @@ class SensorsScreen extends StatelessWidget {
                     ],
                   ),
                 ).animate().fade(delay: 200.ms).scaleXY(begin: 0.95, end: 1.0),
+
                 const SizedBox(height: 48),
 
                 // Sensor list
@@ -79,19 +80,26 @@ class SensorsScreen extends StatelessWidget {
   }
 
   Widget _buildStatusItem({required IconData icon, required String label, required String value, required Color color}) {
-    return Column(
-      children: [
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(16)),
-          child: Icon(icon, color: color, size: 30),
+    // FIXED: Wrapped in Expanded so elements share horizontal space equally without overflowing
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 50, // Slightly smaller for mobile safety
+              height: 50,
+              decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(16)),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(height: 12),
+            Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: color)),
+            const SizedBox(height: 4),
+            Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+          ],
         ),
-        const SizedBox(height: 12),
-        Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: color)),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
-      ],
+      ),
     );
   }
 
@@ -107,6 +115,7 @@ class SensorsScreen extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               width: 50,
@@ -127,9 +136,13 @@ class SensorsScreen extends StatelessWidget {
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                   ),
                   const SizedBox(height: 4),
-                  Text('Plot $sensorId - Impasugong Sector', style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary)),
-                  const SizedBox(height: 8),
-                  Row(
+                  Text('Plot $sensorId - Impasugong Sector', style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+                  const SizedBox(height: 12),
+                  // FIXED: Replaced Row with Wrap to prevent the badge from pushing text off-screen
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -140,14 +153,12 @@ class SensorsScreen extends StatelessWidget {
                         ),
                         child: Text(status, style: TextStyle(fontSize: 11, color: cardColor, fontWeight: FontWeight.w800)),
                       ),
-                      const SizedBox(width: 12),
-                      const Text('CO₂: 1.2 kg/day', style: TextStyle(fontSize: 14, color: AppTheme.textPrimary)),
+                      const Text('CO₂ : 1.2 kg/day', style: TextStyle(fontSize: 13, color: AppTheme.textPrimary)),
                     ],
                   ),
                 ],
               ),
             ),
-
             // Interactive 3-Dot Menu
             IconButton(
               icon: const Icon(Icons.more_vert, color: AppTheme.textSecondary),
@@ -177,14 +188,13 @@ class SensorsScreen extends StatelessWidget {
               const SizedBox(height: 24),
               Text('Manage $nodeTitle', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
               const SizedBox(height: 24),
-
               _MenuActionTile(
                 icon: Icons.bar_chart,
                 title: 'View Live Telemetry',
                 color: AppTheme.primary,
                 onTap: () {
-                  Navigator.pop(ctx); // Close the bottom sheet first
-                  _showTelemetryDialog(context, nodeTitle); // THEN open the interactive dialog
+                  Navigator.pop(ctx);
+                  _showTelemetryDialog(context, nodeTitle);
                 },
               ),
               _MenuActionTile(

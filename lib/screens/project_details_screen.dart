@@ -4,15 +4,16 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/app_theme.dart';
 import '../widgets/navbar.dart';
 import '../utils/auth_state.dart';
+import '../utils/wallet_state.dart';
+import '../utils/responsive.dart'; // NEW
 
 class ProjectDetailsScreen extends StatelessWidget {
   final String id;
-
   const ProjectDetailsScreen({super.key, required this.id});
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 768;
+    final isDesktop = Responsive.isDesktop(context); // FIXED: Using pure Desktop check
 
     final project = {
       'id': id,
@@ -21,7 +22,7 @@ class ProjectDetailsScreen extends StatelessWidget {
       'owner': 'Datu Salise Family',
       'price': 15.50,
       'currency': 'USD',
-      'creditsAvailable': 1200,
+      'creditsAvailable': 1200.50,
       'absorptionRate': '1.2 tons CO2/day',
       'verifiedBy': 'DENR & EchoTrace IoT',
       'image': 'https://images.unsplash.com/photo-1564496027516-78e6fc218e97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
@@ -34,15 +35,16 @@ class ProjectDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: const EchoTraceNavBar(currentRoute: '/marketplace'),
+      // FIXED: Added the EchoTraceDrawer so navigation isn't broken on mobile/tablet
+      drawer: isDesktop ? null : const EchoTraceDrawer(currentRoute: '/marketplace'),
       body: Container(
         color: AppTheme.background,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hero Image
               Container(
-                height: isDesktop ? 400 : 250,
+                height: Responsive.isMobile(context) ? 250 : 400,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: NetworkImage(project['image'] as String),
@@ -50,9 +52,8 @@ class ProjectDetailsScreen extends StatelessWidget {
                   ),
                 ),
               ).animate().fade(duration: 600.ms),
-
               Padding(
-                padding: const EdgeInsets.all(32),
+                padding: EdgeInsets.all(Responsive.isMobile(context) ? 20 : 32),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1000),
@@ -64,7 +65,6 @@ class ProjectDetailsScreen extends StatelessWidget {
                           style: Theme.of(context).textTheme.displayMedium,
                         ).animate().fade(delay: 100.ms).slideY(begin: 0.1),
                         const SizedBox(height: 16),
-
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
@@ -81,12 +81,9 @@ class ProjectDetailsScreen extends StatelessWidget {
                               ),
                           ],
                         ).animate().fade(delay: 200.ms),
-
                         const SizedBox(height: 32),
-
-                        // Key metrics
                         Container(
-                          padding: const EdgeInsets.all(32),
+                          padding: EdgeInsets.all(Responsive.isMobile(context) ? 24 : 32),
                           decoration: BoxDecoration(
                             color: AppTheme.surfaceLight,
                             borderRadius: BorderRadius.circular(24),
@@ -110,10 +107,7 @@ class ProjectDetailsScreen extends StatelessWidget {
                             ],
                           ),
                         ).animate().fade(delay: 300.ms).scaleXY(begin: 0.95),
-
                         const SizedBox(height: 32),
-
-                        // Dynamic CTA Section
                         ValueListenableBuilder<String?>(
                           valueListenable: globalAuth.currentRole,
                           builder: (context, role, child) {
@@ -135,9 +129,13 @@ class ProjectDetailsScreen extends StatelessWidget {
                               width: double.infinity,
                               child: ElevatedButton.icon(
                                 onPressed: () {
+                                  if (role == 'buyer' || role == null) {
+                                    globalWallet.deductCredits(10.50);
+                                  }
+
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('$btnText action simulated successfully.'),
+                                      content: Text('$btnText action completed. Balance Updated.'),
                                       backgroundColor: btnColor,
                                     ),
                                   );
@@ -149,7 +147,7 @@ class ProjectDetailsScreen extends StatelessWidget {
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 ),
                                 icon: Icon(btnIcon),
-                                label: Text(btnText, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                label: Text(btnText, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               ),
                             ).animate().fade(delay: 500.ms).slideY(begin: 0.2);
                           },
@@ -176,7 +174,7 @@ class ProjectDetailsScreen extends StatelessWidget {
           RichText(
             text: TextSpan(
               children: [
-                TextSpan(text: value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
+                TextSpan(text: value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
                 if (unit.isNotEmpty) TextSpan(text: unit, style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary)),
               ],
             ),

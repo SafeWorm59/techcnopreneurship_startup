@@ -11,6 +11,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = Responsive.isDesktop(context);
+    final isMobile = Responsive.isMobile(context);
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -20,7 +21,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             // Rich Hero Section
             Container(
-              height: isDesktop ? 650 : 550,
+              constraints: BoxConstraints(minHeight: isDesktop ? 650 : 550),
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: NetworkImage(
@@ -43,11 +44,10 @@ class HomeScreen extends StatelessWidget {
                 child: Center(
                   child: MaxWidthContainer(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 64.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Live Indicator
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
@@ -121,35 +121,61 @@ class HomeScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.displayMedium,
                     ).animate().fade().slideY(),
                     const SizedBox(height: 64),
-                    GridView.count(
-                      crossAxisCount: isDesktop ? 3 : 1,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 32,
-                      crossAxisSpacing: 32,
-                      childAspectRatio: isDesktop ? 0.85 : 1.2,
-                      children: [
-                        _buildFeatureCard(
-                          icon: Icons.analytics,
-                          title: 'EchoTrace IoT Sensors',
-                          // FIXED: Updated to reflect the ₱1,500 monthly lease model from the BMC
-                          description: 'Automated tracking of CO2 absorption replaces manual logs. We offer a low-barrier entry via an affordable equipment lease (₱1,500/mo), opening a long-term pathway to turn land into income.',
-                          delay: 100,
-                        ),
-                        _buildFeatureCard(
-                          icon: Icons.verified,
-                          title: 'Verified Legitimacy',
-                          description: 'DENR cross-validation provides the objective proof that global buyers demand. Say goodbye to opaque carbon offsets.',
-                          delay: 200,
-                        ),
-                        _buildFeatureCard(
-                          icon: Icons.forest,
-                          title: 'Earn Without Cutting',
-                          description: 'Trees now have cash value while standing. Landowners gain profit, avoiding the pressure to cut for agriculture.',
-                          delay: 300,
-                        ),
-                      ],
-                    ),
+                    // FIXED: Dynamic Layout to avoid GridView constraint crashes on Mobile
+                    if (isMobile)
+                      Column(
+                        children: [
+                          _buildFeatureCard(
+                            icon: Icons.analytics,
+                            title: 'EchoTrace IoT Sensors',
+                            description: 'Automated tracking of CO2 absorption replaces manual logs. We offer a low-barrier entry via an affordable equipment lease (₱1,500/mo), opening a long-term pathway to turn land into income.',
+                            delay: 100,
+                          ),
+                          const SizedBox(height: 24),
+                          _buildFeatureCard(
+                            icon: Icons.verified,
+                            title: 'Verified Legitimacy',
+                            description: 'DENR cross-validation provides the objective proof that global buyers demand. Say goodbye to opaque carbon offsets.',
+                            delay: 200,
+                          ),
+                          const SizedBox(height: 24),
+                          _buildFeatureCard(
+                            icon: Icons.forest,
+                            title: 'Earn Without Cutting',
+                            description: 'Trees now have cash value while standing. Landowners gain profit, avoiding the pressure to cut for agriculture.',
+                            delay: 300,
+                          ),
+                        ],
+                      )
+                    else
+                      GridView.count(
+                        crossAxisCount: isDesktop ? 3 : 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 32,
+                        crossAxisSpacing: 32,
+                        childAspectRatio: isDesktop ? 0.85 : 1.0,
+                        children: [
+                          _buildFeatureCard(
+                            icon: Icons.analytics,
+                            title: 'EchoTrace IoT Sensors',
+                            description: 'Automated tracking of CO2 absorption replaces manual logs. We offer a low-barrier entry via an affordable equipment lease (₱1,500/mo), opening a long-term pathway to turn land into income.',
+                            delay: 100,
+                          ),
+                          _buildFeatureCard(
+                            icon: Icons.verified,
+                            title: 'Verified Legitimacy',
+                            description: 'DENR cross-validation provides the objective proof that global buyers demand. Say goodbye to opaque carbon offsets.',
+                            delay: 200,
+                          ),
+                          _buildFeatureCard(
+                            icon: Icons.forest,
+                            title: 'Earn Without Cutting',
+                            description: 'Trees now have cash value while standing. Landowners gain profit, avoiding the pressure to cut for agriculture.',
+                            delay: 300,
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),
@@ -160,6 +186,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // FIXED: Removed the dangerous "Expanded" widget around text to prevent Height Overflows
   Widget _buildFeatureCard({required IconData icon, required String title, required String description, required int delay}) {
     return Container(
       padding: const EdgeInsets.all(32),
@@ -177,6 +204,7 @@ class HomeScreen extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.all(16),
@@ -189,16 +217,13 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 24),
           Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
           const SizedBox(height: 16),
-          Expanded(
-            child: Text(description, style: const TextStyle(fontSize: 15, color: AppTheme.textSecondary, height: 1.6)),
-          ),
+          Text(description, style: const TextStyle(fontSize: 15, color: AppTheme.textSecondary, height: 1.6)),
         ],
       ),
     ).animate().fade(delay: delay.ms).scaleXY(begin: 0.95);
   }
 }
 
-// Pulsating dot for the "Live" effect
 class _PulseDot extends StatefulWidget {
   const _PulseDot();
   @override

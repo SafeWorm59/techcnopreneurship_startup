@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../dashboard_screen.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/responsive.dart'; // NEW
 
 class ValidatorDashboard extends BaseDashboardScreen {
   const ValidatorDashboard({super.key});
@@ -28,16 +29,13 @@ class ValidatorDashboard extends BaseDashboardScreen {
   }
 }
 
-// Stateful widget handles the interactive list
 class _ValidationQueue extends StatefulWidget {
   const _ValidationQueue();
-
   @override
   State<_ValidationQueue> createState() => _ValidationQueueState();
 }
 
 class _ValidationQueueState extends State<_ValidationQueue> {
-  // Local state: Focused entirely on Bukidnon scope
   List<Map<String, String>> pendingQueue = [
     {'id': 'B-04', 'title': 'Impasugong Sector 4', 'dbh': '42cm', 'biomass': '45kg'},
     {'id': 'P-12', 'title': 'Kalatungan Range Reserve', 'dbh': '15cm', 'biomass': '12kg'},
@@ -50,7 +48,6 @@ class _ValidationQueueState extends State<_ValidationQueue> {
       barrierDismissible: false,
       builder: (ctx) => const Center(child: CircularProgressIndicator(color: AppTheme.primary)),
     );
-
     await Future.delayed(const Duration(seconds: 1));
     if (mounted) Navigator.pop(context);
 
@@ -70,6 +67,8 @@ class _ValidationQueueState extends State<_ValidationQueue> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Responsive.isMobile(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -93,6 +92,8 @@ class _ValidationQueueState extends State<_ValidationQueue> {
           ...pendingQueue.asMap().entries.map((entry) {
             final idx = entry.key;
             final item = entry.value;
+
+            // FIXED: Broken row buttons forced this text to squish. Made it responsive.
             return Container(
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
@@ -100,30 +101,71 @@ class _ValidationQueueState extends State<_ValidationQueue> {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppTheme.primaryDark.withOpacity(0.3)),
               ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(24),
-                leading: const Icon(Icons.assignment_late, color: Colors.orange, size: 36),
-                title: Text('Verify DBH Data: ${item['title']}', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w800, fontSize: 18)),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text('IoT reported DBH: ${item['dbh']}. Manual field check required to authorize carbon token minting.', style: const TextStyle(color: AppTheme.textSecondary, height: 1.5)),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextButton.icon(
-                      onPressed: () => _handleAction(idx, false),
-                      icon: const Icon(Icons.close, color: Colors.redAccent),
-                      label: const Text('Decline', style: TextStyle(color: Colors.redAccent)),
+              padding: const EdgeInsets.all(24),
+              child: isMobile
+                  ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.assignment_late, color: Colors.orange, size: 36),
+                      const SizedBox(width: 16),
+                      Expanded(child: Text('Verify DBH Data: ${item['title']}', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w800, fontSize: 18))),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text('IoT reported DBH: ${item['dbh']}. Manual field check required to authorize carbon token minting.', style: const TextStyle(color: AppTheme.textSecondary, height: 1.5)),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => _handleAction(idx, false),
+                        icon: const Icon(Icons.close, color: Colors.redAccent),
+                        label: const Text('Decline', style: TextStyle(color: Colors.redAccent)),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton.icon(
+                        onPressed: () => _handleAction(idx, true),
+                        icon: const Icon(Icons.check),
+                        label: const Text('Approve'),
+                      ),
+                    ],
+                  ),
+                ],
+              )
+                  : Row(
+                children: [
+                  const Icon(Icons.assignment_late, color: Colors.orange, size: 36),
+                  const SizedBox(width: 24),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Verify DBH Data: ${item['title']}', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w800, fontSize: 18)),
+                        const SizedBox(height: 8),
+                        Text('IoT reported DBH: ${item['dbh']}. Manual field check required to authorize carbon token minting.', style: const TextStyle(color: AppTheme.textSecondary, height: 1.5)),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    ElevatedButton.icon(
-                      onPressed: () => _handleAction(idx, true),
-                      icon: const Icon(Icons.check),
-                      label: const Text('Approve'),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 16),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => _handleAction(idx, false),
+                        icon: const Icon(Icons.close, color: Colors.redAccent),
+                        label: const Text('Decline', style: TextStyle(color: Colors.redAccent)),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton.icon(
+                        onPressed: () => _handleAction(idx, true),
+                        icon: const Icon(Icons.check),
+                        label: const Text('Approve'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ).animate().fade(delay: (100 * idx).ms).slideX(begin: 0.05);
           }),

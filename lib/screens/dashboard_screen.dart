@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart'; // <--- Added Animations
+import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/navbar.dart';
 import '../utils/responsive.dart';
 import '../theme/app_theme.dart';
@@ -12,9 +12,9 @@ abstract class BaseDashboardScreen extends StatelessWidget {
   String get displaySubtitle;
   IconData get roleIcon;
   List<DashboardStat> get stats;
+
   Widget buildRoleContent(BuildContext context);
 
-  // FIXED: Proper badge logic for all 3 roles
   String get badgeLabel {
     if (role == 'landowner') return 'Bukidnon Landowner';
     if (role == 'validator') return 'Official Validator';
@@ -27,6 +27,8 @@ abstract class BaseDashboardScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: EchoTraceNavBar(currentRoute: '/dashboard/$role'),
+      // FIXED: Added the missing drawer so mobile users can actually navigate!
+      drawer: isDesktop ? null : EchoTraceDrawer(currentRoute: '/dashboard/$role'),
       body: SingleChildScrollView(
         child: MaxWidthContainer(
           child: Padding(
@@ -34,13 +36,13 @@ abstract class BaseDashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildProfileHeader(),
+                _buildProfileHeader(context),
                 const SizedBox(height: 32),
                 _buildStatsGrid(context),
                 const SizedBox(height: 40),
                 buildRoleContent(context),
               ],
-            ).animate() // <--- Pro UI Entrance Animation
+            ).animate()
                 .fade(duration: 500.ms)
                 .slideY(begin: 0.05, end: 0, curve: Curves.easeOutQuart),
           ),
@@ -49,9 +51,12 @@ abstract class BaseDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader() {
+  // FIXED: Made the profile header responsive to prevent vertical text squishing
+  Widget _buildProfileHeader(BuildContext context) {
+    final isMobile = Responsive.isMobile(context);
+
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(isMobile ? 24 : 32),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -61,7 +66,46 @@ abstract class BaseDashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppTheme.primaryDark.withOpacity(0.3)),
       ),
-      child: Row(
+      child: isMobile
+          ? Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [AppTheme.primary, AppTheme.primaryDark]),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(roleIcon, color: AppTheme.surface, size: 30),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryDark.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: AppTheme.primaryDark.withOpacity(0.4)),
+                ),
+                child: Text(
+                  badgeLabel,
+                  style: const TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            displayName,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textPrimary),
+          ),
+          const SizedBox(height: 4),
+          Text(displaySubtitle, style: const TextStyle(fontSize: 14, color: AppTheme.primary)),
+        ],
+      )
+          : Row(
         children: [
           Container(
             width: 72,
@@ -118,7 +162,7 @@ abstract class BaseDashboardScreen extends StatelessWidget {
           ),
           itemCount: stats.length,
           itemBuilder: (context, index) => _StatCard(stat: stats[index])
-              .animate(delay: (100 * index).ms) // Staggered card animations
+              .animate(delay: (100 * index).ms)
               .fade()
               .scaleXY(begin: 0.95, end: 1.0, curve: Curves.easeOutBack),
         );

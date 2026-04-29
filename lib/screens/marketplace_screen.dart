@@ -30,31 +30,33 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = Responsive.isDesktop(context);
+    final isMobile = Responsive.isMobile(context);
 
     return Scaffold(
       appBar: const EchoTraceNavBar(currentRoute: '/marketplace'),
-      drawer: isDesktop ? null : EchoTraceDrawer(currentRoute: '/marketplace'), // FIXED: Removed 'const'
+      drawer: isDesktop ? null : const EchoTraceDrawer(currentRoute: '/marketplace'),
       body: Column(
         children: [
           // Animated Hero Header
           Container(
             width: double.infinity,
             color: AppTheme.surfaceLight,
-            padding: EdgeInsets.fromLTRB(24, isDesktop ? 64 : 40, 24, 48),
+            // FIXED: Significantly reduced padding on mobile to save vertical screen real estate
+            padding: EdgeInsets.fromLTRB(24, isDesktop ? 64 : 24, 24, isMobile ? 32 : 48),
             child: Column(
               children: [
                 Text(
                   'Verified Carbon Credit\nMarketplace',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.displayMedium,
+                  style: isMobile ? Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 28) : Theme.of(context).textTheme.displayMedium,
                 ).animate().fade(duration: 600.ms).slideY(begin: 0.2, end: 0),
-                const SizedBox(height: 16),
-                const Text(
+                const SizedBox(height: 12),
+                Text(
                   'Directly purchase scientifically-backed carbon offsets\nfrom Bukidnon landowners. Verified by DENR.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: AppTheme.primary, height: 1.6),
+                  style: TextStyle(fontSize: isMobile ? 14 : 16, color: AppTheme.primary, height: 1.6),
                 ).animate().fade(delay: 200.ms),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
                 // Search Bar
                 MaxWidthContainer(
@@ -64,8 +66,20 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     onChanged: (v) => setState(() => _searchQuery = v),
                     style: const TextStyle(color: AppTheme.textPrimary),
                     decoration: InputDecoration(
-                      hintText: 'Search by location, owner, or project name...',
+                      isDense: true, // FIXED: Makes the text field physically slimmer
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      hintText: 'Search by location, owner...',
                       prefixIcon: const Icon(Icons.search, color: AppTheme.primary),
+                      filled: true,
+                      fillColor: AppTheme.background.withOpacity(0.5),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: AppTheme.primaryDark.withOpacity(0.5)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: AppTheme.primaryDark.withOpacity(0.5)),
+                      ),
                     ),
                   ).animate().fade(delay: 300.ms).scaleXY(begin: 0.9, end: 1.0),
                 ),
@@ -81,12 +95,12 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                   ? Center(child: Text('No projects found.', style: Theme.of(context).textTheme.titleLarge))
                   : MaxWidthContainer(
                 child: GridView.builder(
-                  padding: EdgeInsets.all(isDesktop ? 32 : 16),
+                  padding: EdgeInsets.all(isMobile ? 16 : 32),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: isDesktop ? 2 : 1,
                     crossAxisSpacing: 24,
                     mainAxisSpacing: 24,
-                    mainAxisExtent: 200,
+                    mainAxisExtent: isMobile ? 380 : 200,
                   ),
                   itemCount: _filteredListings.length,
                   itemBuilder: (context, index) {
@@ -107,18 +121,79 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
 class _ListingCard extends StatelessWidget {
   final MarketplaceListing listing;
-
   const _ListingCard({required this.listing});
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Responsive.isMobile(context);
+
     return Card(
       child: InkWell(
         onTap: () => context.go('/project/${listing.id}'),
         borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: Row(
+          child: isMobile
+              ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  listing.image,
+                  width: double.infinity,
+                  height: 160,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: double.infinity,
+                    height: 160,
+                    color: AppTheme.primaryDark.withOpacity(0.2),
+                    child: const Icon(Icons.forest, color: AppTheme.primary, size: 40),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                listing.title,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.textPrimary),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.location_on, size: 14, color: AppTheme.primary),
+                  const SizedBox(width: 4),
+                  Text(listing.location, style: const TextStyle(fontSize: 13, color: AppTheme.primary)),
+                ],
+              ),
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '\$${listing.price.toStringAsFixed(2)}',
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.primary),
+                      ),
+                      Text('${listing.creditsAvailable} credits left', style: TextStyle(fontSize: 12, color: AppTheme.textPrimary.withOpacity(0.6))),
+                    ],
+                  ),
+                  ElevatedButton(
+                    onPressed: () => context.go('/project/${listing.id}'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    ),
+                    child: const Text('View'),
+                  ),
+                ],
+              ),
+            ],
+          )
+              : Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(

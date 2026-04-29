@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/navbar.dart';
 import '../theme/app_theme.dart';
 import '../utils/responsive.dart';
+import '../utils/wallet_state.dart'; // NEW: Imported the wallet state
 
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
@@ -33,7 +34,7 @@ class WalletScreen extends StatelessWidget {
                 ).animate().fade(delay: 100.ms),
                 const SizedBox(height: 32),
 
-                // Balance card
+                // Balance card with live data
                 Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
@@ -50,55 +51,59 @@ class WalletScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Available Credits',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppTheme.textPrimary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        '127',
-                        style: TextStyle(
-                          fontSize: 56,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.primary,
-                          height: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Equivalent to 127 tons CO₂ absorbed',
-                        style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
-                      ),
-                      const SizedBox(height: 32),
-                      Row(
+                  child: ValueListenableBuilder<double>(
+                    valueListenable: globalWallet.accumulatedCredits,
+                    builder: (context, balance, child) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () => context.go('/marketplace'),
-                              child: const Text('Sell Credits'),
+                          const Text(
+                            'Available Credits',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppTheme.textPrimary,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () => _showQrDialog(context), // <--- Trigger QR
-                              icon: const Icon(Icons.qr_code_2),
-                              label: const Text('Share QR'),
+                          const SizedBox(height: 8),
+                          Text(
+                            balance.toStringAsFixed(2), // Formats dynamically with decimals
+                            style: const TextStyle(
+                              fontSize: 56,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.primary,
+                              height: 1,
                             ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Equivalent to ${balance.toStringAsFixed(2)} tons CO₂ absorbed',
+                            style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+                          ),
+                          const SizedBox(height: 32),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () => context.go('/marketplace'),
+                                  child: const Text('Sell Credits'),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => _showQrDialog(context),
+                                  icon: const Icon(Icons.qr_code_2),
+                                  label: const Text('Share QR'),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ).animate().fade(delay: 200.ms).scaleXY(begin: 0.95, end: 1.0),
-
                 const SizedBox(height: 48),
 
                 // Transaction history
@@ -107,11 +112,11 @@ class WalletScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                 ).animate().fade(delay: 300.ms),
                 const SizedBox(height: 16),
-                _buildTransactionItem(type: 'earned', title: 'CO₂ Absorption', subtitle: 'Plot #2401 - 12kg absorbed', amount: '+12', date: '2 days ago')
+                _buildTransactionItem(type: 'earned', title: 'CO₂ Absorption', subtitle: 'Plot #2401 - 12kg absorbed', amount: '+12.00', date: '2 days ago')
                     .animate().fade(delay: 400.ms).slideX(begin: 0.05, end: 0),
-                _buildTransactionItem(type: 'sold', title: 'Credit Sale', subtitle: 'Sold 25 credits to TechCorp', amount: '-25', date: '1 week ago')
+                _buildTransactionItem(type: 'sold', title: 'Credit Sale', subtitle: 'Sold 25 credits to TechCorp', amount: '-25.00', date: '1 week ago')
                     .animate().fade(delay: 500.ms).slideX(begin: 0.05, end: 0),
-                _buildTransactionItem(type: 'earned', title: 'CO₂ Absorption', subtitle: 'Plot #2402 - 8kg absorbed', amount: '+8', date: '5 days ago')
+                _buildTransactionItem(type: 'earned', title: 'CO₂ Absorption', subtitle: 'Plot #2402 - 8kg absorbed', amount: '+8.00', date: '5 days ago')
                     .animate().fade(delay: 600.ms).slideX(begin: 0.05, end: 0),
               ],
             ),
@@ -121,7 +126,6 @@ class WalletScreen extends StatelessWidget {
     );
   }
 
-  // --- NEW: The Interactive QR Dialog ---
   void _showQrDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -143,8 +147,6 @@ class WalletScreen extends StatelessWidget {
               ),
               const Divider(color: AppTheme.primaryDark),
               const SizedBox(height: 24),
-
-              // Simulated QR Code Graphic
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -153,7 +155,6 @@ class WalletScreen extends StatelessWidget {
                 ),
                 child: const Icon(Icons.qr_code_2, size: 200, color: Colors.black87),
               ).animate().scale(curve: Curves.easeOutBack, duration: 400.ms),
-
               const SizedBox(height: 24),
               const Text(
                 'Scan to view public portfolio',
@@ -166,7 +167,6 @@ class WalletScreen extends StatelessWidget {
                 style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
               ),
               const SizedBox(height: 32),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -190,6 +190,7 @@ class WalletScreen extends StatelessWidget {
   Widget _buildTransactionItem({required String type, required String title, required String subtitle, required String amount, required String date}) {
     final isEarned = type == 'earned';
     final color = isEarned ? AppTheme.primary : Colors.redAccent;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(

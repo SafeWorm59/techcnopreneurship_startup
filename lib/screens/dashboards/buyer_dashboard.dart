@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../dashboard_screen.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/responsive.dart'; // NEW
 
 class BuyerDashboard extends BaseDashboardScreen {
   const BuyerDashboard({super.key});
@@ -41,23 +42,62 @@ class BuyerDashboard extends BaseDashboardScreen {
     );
   }
 
+  // FIXED: Replaced rigid ListTile with a responsive Column/Row setup
   Widget _buildPortfolioItem(BuildContext context, String title, String credits, int index) {
+    final isMobile = Responsive.isMobile(context);
+
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surfaceLight,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.primaryDark.withOpacity(0.4)),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(24),
-        leading: const Icon(Icons.forest, color: AppTheme.primary, size: 36),
-        title: Text(title, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w800, fontSize: 18)),
-        subtitle: Text('$credits • Verified by DENR • IoT Active', style: const TextStyle(color: AppTheme.textSecondary, height: 2)),
-        trailing: ElevatedButton.icon(
-            onPressed: () => _showImpactReport(context, title, credits),
-            icon: const Icon(Icons.picture_as_pdf, size: 18),
-            label: const Text('View Impact Report')
-        ),
+      padding: const EdgeInsets.all(24),
+      child: isMobile
+          ? Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.forest, color: AppTheme.primary, size: 36),
+              const SizedBox(width: 16),
+              Expanded(child: Text(title, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w800, fontSize: 18))),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text('$credits • Verified by DENR • IoT Active', style: const TextStyle(color: AppTheme.textSecondary)),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+                onPressed: () => _showImpactReport(context, title, credits),
+                icon: const Icon(Icons.picture_as_pdf, size: 18),
+                label: const Text('View Impact Report')
+            ),
+          ),
+        ],
+      )
+          : Row(
+        children: [
+          const Icon(Icons.forest, color: AppTheme.primary, size: 36),
+          const SizedBox(width: 24),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w800, fontSize: 18)),
+                const SizedBox(height: 4),
+                Text('$credits • Verified by DENR • IoT Active', style: const TextStyle(color: AppTheme.textSecondary)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          ElevatedButton.icon(
+              onPressed: () => _showImpactReport(context, title, credits),
+              icon: const Icon(Icons.picture_as_pdf, size: 18),
+              label: const Text('View Impact Report')
+          ),
+        ],
       ),
     ).animate().fade(delay: (100 * index).ms).slideX(begin: 0.05);
   }
@@ -66,7 +106,7 @@ class BuyerDashboard extends BaseDashboardScreen {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: const Color(0xFFF4F4F4), // Light paper-like background for report
+        backgroundColor: const Color(0xFFF4F4F4),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           width: 550,
@@ -76,7 +116,7 @@ class BuyerDashboard extends BaseDashboardScreen {
             children: [
               const Icon(Icons.verified, color: Colors.green, size: 64),
               const SizedBox(height: 16),
-              const Text('CERTIFICATE OF OFFSET', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.black87, letterSpacing: 2)),
+              const Text('CERTIFICATE OF OFFSET', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.black87, letterSpacing: 2), textAlign: TextAlign.center),
               const SizedBox(height: 8),
               const Text('Issued to TechCorp Global', style: TextStyle(fontSize: 16, color: Colors.black54)),
               const Padding(
@@ -112,9 +152,11 @@ class BuyerDashboard extends BaseDashboardScreen {
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
-          Text(value, style: const TextStyle(color: Colors.black54)),
+          const SizedBox(width: 16),
+          Expanded(child: Text(value, style: const TextStyle(color: Colors.black54), textAlign: TextAlign.right)),
         ],
       ),
     );

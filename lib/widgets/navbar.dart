@@ -6,7 +6,6 @@ import '../utils/auth_state.dart';
 
 class EchoTraceNavBar extends StatelessWidget implements PreferredSizeWidget {
   final String currentRoute;
-
   const EchoTraceNavBar({super.key, required this.currentRoute});
 
   @override
@@ -14,9 +13,10 @@ class EchoTraceNavBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = Responsive.isDesktop(context) || Responsive.isTablet(context);
+    // FIXED: Strictly define Desktop. Treat Tablets like Mobile for the Nav Bar
+    // to prevent hidden navigation links.
+    final isDesktop = Responsive.isDesktop(context);
 
-    // Listen to the global auth state dynamically
     return ValueListenableBuilder<String?>(
       valueListenable: globalAuth.currentRole,
       builder: (context, role, child) {
@@ -139,15 +139,12 @@ class EchoTraceNavBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-// FIXED: Added the smart, auth-aware EchoTraceDrawer
 class EchoTraceDrawer extends StatelessWidget {
   final String currentRoute;
-
   const EchoTraceDrawer({super.key, required this.currentRoute});
 
   @override
   Widget build(BuildContext context) {
-    // Wrap the drawer in the Auth listener so mobile users see the correct links
     return ValueListenableBuilder<String?>(
       valueListenable: globalAuth.currentRole,
       builder: (context, role, child) {
@@ -166,7 +163,6 @@ class EchoTraceDrawer extends StatelessWidget {
                 ),
               ),
               _buildDrawerItem(context, 'Home', Icons.home, '/'),
-
               if (!isAuthenticated) ...[
                 _buildDrawerItem(context, 'Login', Icons.login, '/login'),
                 _buildDrawerItem(context, 'Marketplace', Icons.store, '/marketplace'),

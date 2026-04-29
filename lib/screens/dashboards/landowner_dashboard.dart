@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../dashboard_screen.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/wallet_state.dart';
+import '../../utils/responsive.dart'; // NEW
 
 class LandownerDashboard extends BaseDashboardScreen {
   const LandownerDashboard({super.key});
@@ -38,37 +40,80 @@ class LandownerDashboard extends BaseDashboardScreen {
     );
   }
 
+  // FIXED: Converted hard ListTile into flexible Column for mobile
   Widget _buildInteractiveNodeCard(BuildContext context, String title, String dbh, String co2, bool isOnline) {
+    final isMobile = Responsive.isMobile(context);
+
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surfaceLight,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: isOnline ? AppTheme.primaryDark.withOpacity(0.4) : Colors.red.withOpacity(0.4)),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        leading: Icon(Icons.router, color: isOnline ? AppTheme.primary : Colors.redAccent, size: 36),
-        title: Text(title, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w800, fontSize: 18)),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Row(
+      padding: const EdgeInsets.all(24),
+      child: isMobile
+          ? Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              _StatusBadge(status: isOnline ? 'Online' : 'Offline', color: isOnline ? Colors.green : Colors.redAccent),
-              const SizedBox(width: 12),
-              // FIXED: Wrapped Text in Expanded to prevent RenderFlex Overflow
-              Expanded(
-                child: Text('$dbh • Co2 Absorbed: $co2', style: const TextStyle(color: AppTheme.textSecondary), overflow: TextOverflow.ellipsis),
-              ),
+              Icon(Icons.router, color: isOnline ? AppTheme.primary : Colors.redAccent, size: 36),
+              const SizedBox(width: 16),
+              Expanded(child: Text(title, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w800, fontSize: 18))),
             ],
           ),
-        ),
-        trailing: isOnline
-            ? ElevatedButton.icon(
-          onPressed: () => _showTelemetryDialog(context, title),
-          icon: const Icon(Icons.bar_chart, size: 18),
-          label: const Text('View Data'),
-        )
-            : const SizedBox.shrink(),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              _StatusBadge(status: isOnline ? 'Online' : 'Offline', color: isOnline ? Colors.green : Colors.redAccent),
+              Text('$dbh • Co2 Absorbed: $co2', style: const TextStyle(color: AppTheme.textSecondary)),
+            ],
+          ),
+          if (isOnline) ...[
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _showTelemetryDialog(context, title),
+                icon: const Icon(Icons.bar_chart, size: 18),
+                label: const Text('View Data'),
+              ),
+            )
+          ]
+        ],
+      )
+          : Row(
+        children: [
+          Icon(Icons.router, color: isOnline ? AppTheme.primary : Colors.redAccent, size: 36),
+          const SizedBox(width: 24),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w800, fontSize: 18)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _StatusBadge(status: isOnline ? 'Online' : 'Offline', color: isOnline ? Colors.green : Colors.redAccent),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text('$dbh • Co2 Absorbed: $co2', style: const TextStyle(color: AppTheme.textSecondary), overflow: TextOverflow.ellipsis)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (isOnline) ...[
+            const SizedBox(width: 16),
+            ElevatedButton.icon(
+              onPressed: () => _showTelemetryDialog(context, title),
+              icon: const Icon(Icons.bar_chart, size: 18),
+              label: const Text('View Data'),
+            )
+          ]
+        ],
       ),
     ).animate().fade().slideX(begin: 0.05);
   }
@@ -89,7 +134,6 @@ class LandownerDashboard extends BaseDashboardScreen {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // FIXED: Wrapped Title in Expanded to prevent RenderFlex Overflow
                   Expanded(
                     child: Text('Live Telemetry: $title', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary), overflow: TextOverflow.ellipsis),
                   ),
@@ -100,7 +144,6 @@ class LandownerDashboard extends BaseDashboardScreen {
               const SizedBox(height: 24),
               const Text('Biomass & DBH Growth (Last 6 Months)', style: TextStyle(color: AppTheme.textSecondary)),
               const SizedBox(height: 16),
-              // Simulated Bar Chart
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -113,7 +156,16 @@ class LandownerDashboard extends BaseDashboardScreen {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx),
+                  onPressed: () {
+                    globalWallet.addCredits(15.25);
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Successfully minted 15.25 Carbon Credits! Balance Updated.'),
+                          backgroundColor: Colors.amber,
+                        )
+                    );
+                  },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, foregroundColor: Colors.black),
                   child: const Text('Mint Data to Carbon Credit'),
                 ),
